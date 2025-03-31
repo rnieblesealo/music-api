@@ -3,7 +3,6 @@ import axios from "axios"
 export async function getTopArtists(username) {
   try {
     const apiKey = import.meta.env.VITE_LASTFM_API_KEY;
-    console.log("Key: ", apiKey)
 
     const params = new URLSearchParams({
       api_key: apiKey,
@@ -22,7 +21,9 @@ export async function getTopArtists(username) {
     })
 
     // return top artists json
-    return res.data.topartists.artist;
+    return res.data.topartists.artist.map((entry) => {
+      return entry.name;
+    });
   } catch (err) {
     console.error("Error getting LastFM info: ", err)
     return null;
@@ -59,7 +60,7 @@ export async function getArtistImage(artistName) {
 
         return res.data.access_token
       } catch (error) {
-        console.log("Error getting Spotify access token: ", error)
+        console.error("Error getting Spotify access token: ", error)
       }
     }
 
@@ -92,9 +93,9 @@ export async function getArtistImage(artistName) {
     })
 
     // return first image result (which is likely to be the actual one we're looking for) 
-    return res.data.artists.items[0]
+    return res.data.artists.items[0].images[1].url
   } catch (error) {
-    console.log("Error searching Spotify: ", error)
+    console.error("Error searching Spotify: ", error)
     return null;
   }
 }

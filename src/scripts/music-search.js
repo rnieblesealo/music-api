@@ -22,7 +22,10 @@ export async function getTopArtists(username) {
 
     // return top artists json
     return res.data.topartists.artist.map((entry) => {
-      return entry.name;
+      return {
+        name: entry.name,
+        playCount: entry.playcount
+      }
     });
   } catch (err) {
     console.error("Error getting LastFM info: ", err)

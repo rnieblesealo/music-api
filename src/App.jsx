@@ -1,15 +1,24 @@
 import { getTopArtists, getArtistImage } from "./scripts/music-search"
 import { useState, useEffect, useRef } from "react"
+import { FaLastfm, FaPlay } from "react-icons/fa6";
+import { FaLastfmSquare } from "react-icons/fa";
 
 const App = () => {
-  const ArtistCard = ({ name, imgSrc }) => {
+  const ArtistCard = ({ name, imgSrc, playCount, rank }) => {
     return (
       <li className="flex flex-col items-center justify-top bg-black text-center p-4 rounded-2xl">
         <img
           src={imgSrc}
           className="w-50 object-cover aspect-square rounded-lg"
         />
-        <p className="mt-4 font-bold">{name}</p>
+        <div className="text-white flex flex-col items-center">
+          <p className="mt-4 flex items-center gap-1 w-min text-gray-600">{`#${rank}`}</p>
+          <p className="mt-2 font-bold">{`#${name}`}</p>
+          <p className="mt-2 flex items-center gap-1 w-min">
+            <FaPlay />
+            {playCount}
+          </p>
+        </div>
       </li>
     )
   }
@@ -21,26 +30,29 @@ const App = () => {
     async function getArtistInfo() {
       try {
         // get all the names
-        const artistNames = await getTopArtists(username)
+        const lastFmData = await getTopArtists(username)
 
         // pack image, name kv pairs in array 
         const artistInfo = await Promise.all(
-          artistNames.map(async (artistName) => {
+          lastFmData.map(async (artistData) => {
             try {
-              const artistImage = await getArtistImage(artistName)
-              return {
-                name: artistName,
+              const artistImage = await getArtistImage(artistData.name)
+
+              const finalData = {
+                ...artistData,
                 image: artistImage
               }
+
+              return finalData;
             } catch (err) {
-              console.log(err)
+              console.error(err)
             }
           })
         )
 
         setArtists(artistInfo)
       } catch (err) {
-        console.log(err)
+        console.error(err)
       }
     }
 
@@ -66,12 +78,16 @@ const App = () => {
     }
   }, [])
 
-  const artistCards = artists.length > 0 ? artists.map(({ name, image }) => {
+  const artistCards = artists.length > 0 ? artists.map((info, index) => {
+    console.log(info)
+
     return (
       <ArtistCard
-        key={`a-${name}`}
-        name={name}
-        imgSrc={image}
+        key={`a-${info.name}`}
+        rank={index + 1}
+        name={info.name}
+        playCount={info.playCount}
+        imgSrc={info.image}
       />
     )
   }) : (
@@ -81,16 +97,19 @@ const App = () => {
   )
 
   return (
-    <div className="flex flex-col items-center text-white">
-      <h1 className="text-4xl font-extrabold m-4">#MyTop12</h1>
-      <p>Enter someone's username to find out their top 12 on LastFM!</p>
+    <div className="flex flex-col items-center text-white p-12 bg-gradient-to-b from-black to-red-500 min-h-[1000px]">
+      <h1 className="text-4xl font-extrabold m-4">
+        #MyTop12
+      </h1>
+      <p className="m-3">Enter someone's username to find out their top 12 on LastFM!</p>
       <input
         type="text"
         placeholder="rafaisafar"
         ref={(me) => inputRef.current = me}
         className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
       />
-      <ul className="grid grid-cols-3 w-3/4 gap-3">
+      <p className="flex items-center gap-2 m-3 text-gray-500">Powered by <FaLastfmSquare /></p>
+      <ul className="grid grid-cols-3 gap-3">
         {artistCards}
       </ul>
     </div>

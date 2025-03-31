@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 const App = () => {
   const ArtistCard = ({ name, imgSrc }) => {
     return (
-      <li className="flex flex-col items-center justify-top bg-black text-white text-center p-4 rounded-2xl">
+      <li className="flex flex-col items-center justify-top bg-black text-center p-4 rounded-2xl">
         <img
           src={imgSrc}
           className="w-50 object-cover aspect-square rounded-lg"
@@ -81,14 +81,14 @@ const App = () => {
   )
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center text-white">
       <h1 className="text-4xl font-extrabold m-4">#MyTop12</h1>
       <p>Enter someone's username to find out their top 12 on LastFM!</p>
       <input
         type="text"
         placeholder="rafaisafar"
         ref={(me) => inputRef.current = me}
-        className="text-center focus:outline-none border-0 m-4 p-2 bg-gray-300 rounded-full"
+        className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
       />
       <ul className="grid grid-cols-3 w-3/4 gap-3">
         {artistCards}

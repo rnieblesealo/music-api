@@ -1,25 +1,31 @@
-import { getTopArtists, getArtistImage } from "./scripts/music-search"
+import { getTopArtists, getSpotifyArtistInfo } from "./scripts/music-search"
 import { useState, useEffect, useRef } from "react"
 import { FaLastfm, FaPlay } from "react-icons/fa6";
 import { FaLastfmSquare } from "react-icons/fa";
 
 const App = () => {
-  const ArtistCard = ({ name, imgSrc, playCount, rank }) => {
+  function capitalize(s) {
+    const toks = s.trim().split(" ")
+    return toks.map((tok) => {
+      return tok[0].toUpperCase() + tok.slice(1)
+    }).join(" ")
+  }
+
+  const ArtistCard = ({ name, imgSrc, playCount, rank, followers, popularity, genres }) => {
     return (
-      <li className="flex flex-col items-center justify-top bg-black text-center p-4 rounded-2xl">
-        <img
-          src={imgSrc}
-          className="w-50 object-cover aspect-square rounded-lg"
-        />
-        <div className="text-white flex flex-col items-center">
-          <p className="mt-4 flex items-center gap-1 w-min text-gray-600">{`#${rank}`}</p>
-          <p className="mt-2 font-bold">{`#${name}`}</p>
-          <p className="mt-2 flex items-center gap-1 w-min">
-            <FaPlay />
-            {playCount}
-          </p>
-        </div>
-      </li>
+      <tr className="align-middle text-center">
+        <td className="text-xl font-bold flex items-center">
+          <img
+            src={imgSrc}
+            className="w-30 rounded-2xl object-cover aspect-square"
+          />
+          <p className="mx-4">{`#${rank} ${name}`}</p>
+        </td>
+        <td>{playCount}</td>
+        <td>{genres[0] ? capitalize(genres[0]) : "no data"}</td>
+        <td>{followers}</td>
+        <td>{popularity}</td>
+      </tr>
     )
   }
 
@@ -30,17 +36,17 @@ const App = () => {
     async function getArtistInfo() {
       try {
         // get all the names
-        const lastFmData = await getTopArtists(username)
+        const lastFmTopArtists = await getTopArtists(username)
 
         // pack image, name kv pairs in array 
         const artistInfo = await Promise.all(
-          lastFmData.map(async (artistData) => {
+          lastFmTopArtists.map(async (artistData) => {
             try {
-              const artistImage = await getArtistImage(artistData.name)
+              const spotifyArtistInfo = await getSpotifyArtistInfo(artistData.name)
 
               const finalData = {
                 ...artistData,
-                image: artistImage
+                ...spotifyArtistInfo
               }
 
               return finalData;
@@ -78,9 +84,7 @@ const App = () => {
     }
   }, [])
 
-  const artistCards = artists.length > 0 ? artists.map((info, index) => {
-    console.log(info)
-
+  const artistCards = artists.map((info, index) => {
     return (
       <ArtistCard
         key={`a-${info.name}`}
@@ -88,16 +92,15 @@ const App = () => {
         name={info.name}
         playCount={info.playCount}
         imgSrc={info.image}
+        followers={info.followers}
+        popularity={info.popularity}
+        genres={info.genres}
       />
     )
-  }) : (
-    <div className="text-black">
-      Searching...
-    </div>
-  )
+  })
 
   return (
-    <div className="flex flex-col items-center text-white p-12 bg-gradient-to-b from-black to-red-500 min-h-[1000px]">
+    <div className="flex flex-col items-center text-white p-12 bg-black">
       <h1 className="text-4xl font-extrabold m-4">
         #MyTop12
       </h1>
@@ -106,12 +109,22 @@ const App = () => {
         type="text"
         placeholder="rafaisafar"
         ref={(me) => inputRef.current = me}
-        className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
+        className="text-center text-black focus:outline-none border-0 m-4 mb-8 p-2 bg-white rounded-full placeholder:text-gray-500"
       />
-      <p className="flex items-center gap-2 m-3 text-gray-500">Powered by <FaLastfmSquare /></p>
-      <ul className="grid grid-cols-3 gap-3">
-        {artistCards}
-      </ul>
+      <table className="border-separate border-spacing-2">
+        <thead>
+          <tr className="text-center">
+            <th className="min-w-50">Artist</th>
+            <th className="min-w-30">Play Count</th>
+            <th className="min-w-30">Genre</th>
+            <th className="min-w-30">Followers</th>
+            <th className="min-w-30">Popularity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {artistCards}
+        </tbody>
+      </table>
     </div>
   )
 }

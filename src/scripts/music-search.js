@@ -33,7 +33,7 @@ export async function getTopArtists(username) {
   }
 }
 
-export async function getArtistImage(artistName) {
+export async function getSpotifyArtistInfo(artistName) {
   try {
     async function getAccessToken() {
       // NOTE: spotify uses form-encoded data which is why it's weird to call its api
@@ -95,8 +95,16 @@ export async function getArtistImage(artistName) {
       params: params
     })
 
-    // return first image result (which is likely to be the actual one we're looking for) 
-    return res.data.artists.items[0].images[1].url
+    // get stuff we care about
+    const firstResult = res.data.artists.items[0];
+    const spotifyData = {
+      image: firstResult.images[1].url,
+      genres: firstResult.genres,
+      popularity: parseInt(firstResult.popularity),
+      followers: parseInt(firstResult.followers.total)
+    }
+
+    return spotifyData;
   } catch (error) {
     console.error("Error searching Spotify: ", error)
     return null;

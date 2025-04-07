@@ -46,6 +46,7 @@ const App = () => {
 
   const [username, setUsername] = useState("rafaisafar")
   const [artists, setArtists] = useState([])
+  const [displayedArtists, setDisplayedArtists] = useState([])
   const [mostMainstream, setMostMainstream] = useState(null)
   const [mostNiche, setMostNiche] = useState(null)
   const [mainGenre, setMainGenre] = useState(null)
@@ -75,6 +76,9 @@ const App = () => {
         )
 
         setArtists(artistInfo)
+
+        // displayed artists match
+        setDisplayedArtists(artistInfo)
 
         // set most mainstream (greatest popularity)
         setMostMainstream(
@@ -137,7 +141,7 @@ const App = () => {
     }
   }, [])
 
-  const artistCards = artists.map((info, index) => {
+  const artistCards = displayedArtists.map((info, index) => {
     return (
       <ArtistCard
         key={`${index}-${info.name}`}
@@ -168,6 +172,25 @@ const App = () => {
     </div>
   )
 
+  function onFilterSearch(e) {
+    setDisplayedArtists(
+      artists.filter((artist) => {
+        const searchTerm = e.target.value
+          .trim()
+          .split(" ")
+          .join("")
+          .toLowerCase()
+
+        return artist.name
+          .trim()
+          .split(" ")
+          .join("")
+          .toLowerCase()
+          .includes(searchTerm)
+      })
+    )
+  }
+
   return (
     <div className="flex flex-col items-center text-white p-12 bg-black">
       <h1 className="text-4xl font-extrabold m-4">
@@ -187,6 +210,12 @@ const App = () => {
         </div>
         {mainGenreComp}
       </div>
+      <input
+        type="text"
+        placeholder="Filter search..."
+        onChange={onFilterSearch}
+        className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
+      />
       <table className="border-separate border-spacing-2">
         <thead>
           <tr className="text-center">

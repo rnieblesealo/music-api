@@ -1,56 +1,20 @@
 import { getTopArtists, getSpotifyArtistInfo } from "./scripts/music-search"
 import { useState, useEffect, useRef } from "react"
+import ArtistCard from "./components/ArtistCard"
+import StatCard from "./components/StatCard"
+import capitalize from "./scripts/capitalize"
 
 const App = () => {
-  function capitalize(s) {
-    const toks = s.trim().split(" ")
-    return toks.map((tok) => {
-      return tok[0].toUpperCase() + tok.slice(1)
-    }).join(" ")
-  }
-
-  const ArtistCard = ({ data, rank }) => {
-    const Unk = () => (
-      <p className="text-gray-600">unknown</p>
-    )
-
-    return (
-      <tr className="align-middle text-center">
-        <td className="text-xl font-bold flex items-center">
-          <img
-            src={data.image}
-            className="w-30 rounded-2xl object-cover aspect-square"
-          />
-          <p className="mx-4">{`#${rank + 1} ${data.name}`}</p>
-        </td>
-        <td>{(data && data.playCount) ?? <Unk />}</td>
-        <td>{(data && data.genres && data.genres.length > 0) ? capitalize(data.genres[0]) : <Unk />}</td>
-        <td>{(data && data.followers) ?? <Unk />}</td>
-        <td>{(data && data.popularity) ?? <Unk />}</td>
-      </tr>
-    )
-  }
-
-  const StatCard = ({ data, heading }) => {
-    return (
-      <div className="p-4 rounded-2xl flex flex-col items-center">
-        <p className="text-center my-2">{heading}</p>
-        <img
-          src={data.image}
-          className="w-40 aspect-square object-cover rounded-lg"
-        />
-        <p className="text-center font-bold text-lg my-3">{data.name}</p>
-      </div>
-    )
-  }
-
   const [username, setUsername] = useState("rafaisafar")
   const [artists, setArtists] = useState([])
   const [displayedArtists, setDisplayedArtists] = useState([])
   const [mostMainstream, setMostMainstream] = useState(null)
   const [mostNiche, setMostNiche] = useState(null)
-  const [mainGenre, setMainGenre] = useState(null)
+  const [topGenre, setTopGenre] = useState(null)
 
+  const inputRef = useRef(null)
+
+  // handle default artist info
   useEffect(() => {
     async function getArtistInfo() {
       try {
@@ -94,16 +58,16 @@ const App = () => {
           })
         )
 
-        setMainGenre(() => {
+        setTopGenre(() => {
           // get top match genre for each artist
-          const mainGenres = artistInfo.map((info) => {
+          const topGenres = artistInfo.map((info) => {
             return (info.genres && info.genres.length > 0) ? info.genres[0] : ""
           }).filter((item) => {
             return item !== ""
           })
 
           // basic dict freq counting
-          const freqCounter = mainGenres.reduce((counter, item) => {
+          const freqCounter = topGenres.reduce((counter, item) => {
             counter[item] = (counter[item] || 0) + 1; // add item if unseen; if not just incr. freq
             return counter;
           }, {}) // brackets are initialization of dict we use inside func
@@ -122,12 +86,10 @@ const App = () => {
     getArtistInfo()
   }, [username])
 
-  const inputRef = useRef(null)
-
+  // handle search submit
   useEffect(() => {
     // submit search on enter press
     // not on change to avoid api call abuse
-
     function handleSearchSubmit(e) {
       if (e.key === "Enter") {
         setArtists([])
@@ -151,30 +113,31 @@ const App = () => {
     )
   })
 
-  const mostMainstreamComp = mostMainstream && (
+  const mostMainstreamCard = mostMainstream && (
     <StatCard
       data={mostMainstream}
       heading="Most mainstream"
     />
   )
 
-  const mostNicheComp = mostNiche && (
+  const mostNicheCard = mostNiche && (
     <StatCard
       data={mostNiche}
       heading="Most niche"
     />
   )
 
-  const mainGenreComp = mainGenre && (
+  const topGenreCard = topGenre && (
     <div className="flex flex-col items-center mb-8">
       <p>Most listened to genre</p>
-      <p className="text-2xl font-bold">{mainGenre ? capitalize(mainGenre) : "unknown"}</p>
+      <p className="text-2xl font-bold">{topGenre ? capitalize(topGenre) : "unknown"}</p>
     </div>
   )
 
   function onFilterSearch(e) {
     setDisplayedArtists(
       artists.filter((artist) => {
+        // character-wise lowercase saerch
         const searchTerm = e.target.value
           .trim()
           .split(" ")
@@ -205,10 +168,10 @@ const App = () => {
       />
       <div className="">
         <div className="flex">
-          {mostMainstreamComp}
-          {mostNicheComp}
+          {mostMainstreamCard}
+          {mostNicheCard}
         </div>
-        {mainGenreComp}
+        {topGenreCard}
       </div>
       <input
         type="text"

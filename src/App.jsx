@@ -93,7 +93,7 @@ const App = () => {
         setMainGenre(() => {
           // get top match genre for each artist
           const mainGenres = artistInfo.map((info) => {
-            return info.genres[0] ?? ""
+            return (info.genres && info.genres.length > 0) ? info.genres[0] : ""
           }).filter((item) => {
             return item !== ""
           })

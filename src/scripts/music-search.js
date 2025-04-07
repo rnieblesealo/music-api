@@ -97,6 +97,11 @@ export async function getSpotifyArtistInfo(artistName) {
 
     // get stuff we care about
     const firstResult = res.data.artists.items[0];
+
+    if (!firstResult){
+      return null;
+    }
+
     const spotifyData = {
       image: firstResult.images[1].url,
       genres: firstResult.genres,

@@ -11,20 +11,24 @@ const App = () => {
     }).join(" ")
   }
 
-  const ArtistCard = ({ name, imgSrc, playCount, rank, followers, popularity, genres }) => {
+  const ArtistCard = ({ data, rank }) => {
+    const Unk = () => (
+      <p className="text-gray-600">unknown</p>
+    )
+
     return (
       <tr className="align-middle text-center">
         <td className="text-xl font-bold flex items-center">
           <img
-            src={imgSrc}
+            src={data.image}
             className="w-30 rounded-2xl object-cover aspect-square"
           />
-          <p className="mx-4">{`#${rank} ${name}`}</p>
+          <p className="mx-4">{`#${rank + 1} ${data.name}`}</p>
         </td>
-        <td>{playCount}</td>
-        <td>{genres[0] ? capitalize(genres[0]) : "no data"}</td>
-        <td>{followers}</td>
-        <td>{popularity}</td>
+        <td>{(data && data.playCount) ?? <Unk />}</td>
+        <td>{(data && data.genres && data.genres.length > 0) ? capitalize(data.genres[0]) : <Unk />}</td>
+        <td>{(data && data.followers) ?? <Unk />}</td>
+        <td>{(data && data.popularity) ?? <Unk />}</td>
       </tr>
     )
   }
@@ -87,14 +91,9 @@ const App = () => {
   const artistCards = artists.map((info, index) => {
     return (
       <ArtistCard
-        key={`a-${info.name}`}
-        rank={index + 1}
-        name={info.name}
-        playCount={info.playCount}
-        imgSrc={info.image}
-        followers={info.followers}
-        popularity={info.popularity}
-        genres={info.genres}
+        key={`${index}-${info.name}`}
+        data={info}
+        rank={index}
       />
     )
   })

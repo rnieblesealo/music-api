@@ -12,7 +12,12 @@ const ArtistCard = ({ data, rank }) => {
           src={data.image}
           className="w-30 rounded-2xl object-cover aspect-square"
         />
-        <p className="mx-4">{`#${rank + 1} ${data.name}`}</p>
+        <p className="mx-4">
+          <span className="text-gray-500 mx-2">
+            {`#${rank + 1}`}
+          </span>
+          {`${data.name}`}
+        </p>
       </td>
       <td>{(data && data.playCount) ?? <Unk />}</td>
       <td>{(data && data.genres && data.genres.length > 0) ? capitalize(data.genres[0]) : <Unk />}</td>

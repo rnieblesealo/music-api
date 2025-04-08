@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import ArtistCard from "./components/ArtistCard"
 import StatCard from "./components/StatCard"
 import capitalize from "./scripts/capitalize"
+import clsx from "clsx"
 
 const App = () => {
   const [username, setUsername] = useState("rafaisafar")
@@ -12,6 +13,7 @@ const App = () => {
   const [mostNiche, setMostNiche] = useState(null)
   const [topGenre, setTopGenre] = useState(null)
 
+  const [searchTerm, setSearchTerm] = useState("")
   const [hiddenGenres, setHiddenGenres] = useState([])
 
   const inputRef = useRef(null)
@@ -101,7 +103,6 @@ const App = () => {
     function handleSearchSubmit(e) {
       if (e.key === "Enter") {
         resetEverything()
-        setArtists([])
         setUsername(e.target.value)
       }
     }
@@ -111,6 +112,29 @@ const App = () => {
       searchBar.addEventListener("keydown", handleSearchSubmit)
     }
   }, [])
+
+  // handle filter
+  useEffect(() => {
+    setDisplayedArtists(
+      artists.filter((artist) => {
+        // if genre data exists, apply tag filter
+        if (artist.genres && artist.genres.length > 0) {
+          return !hiddenGenres.includes(artist.genres[0])
+        }
+
+        // if no genre data exists, hide row by default if any hidden genre filter is applied at all 
+        return !hiddenGenres.length > 0;
+      }).filter((artist) => {
+        // match searchterm 
+        return artist.name
+          .trim()
+          .split(" ")
+          .join("")
+          .toLowerCase()
+          .includes(searchTerm)
+      })
+    )
+  }, [hiddenGenres, artists, searchTerm])
 
   const artistCards = displayedArtists.map((info, index) => {
     return (
@@ -149,32 +173,44 @@ const App = () => {
     setMostMainstream("")
     setMostNiche("")
     setTopGenre("")
+    setSearchTerm("")
+    setHiddenGenres([])
   }
 
   function onFilterSearch(e) {
-    setDisplayedArtists(
-      artists.filter((artist) => {
-        // character-wise lowercase saerch
-        const searchTerm = e.target.value
-          .trim()
-          .split(" ")
-          .join("")
-          .toLowerCase()
-
-        return artist.name
-          .trim()
-          .split(" ")
-          .join("")
-          .toLowerCase()
-          .includes(searchTerm)
-      })
+    // modify search term
+    setSearchTerm(
+      e.target.value
+        .trim()
+        .split(" ")
+        .join("")
+        .toLowerCase()
     )
   }
 
   const GenreFilter = () => {
+    function toggleGenreHidden(genre) {
+      // if given genre not hidden, hide it
+      if (!hiddenGenres.includes(genre)) {
+        setHiddenGenres((prev) => [...prev, genre])
+        // if it is hidden, unhide it
+      } else {
+        setHiddenGenres((prev) => {
+          // remove passed genre from list...
+          return prev.filter((item) => item !== genre)
+        })
+      }
+    }
+
     const FilterButton = ({ genre }) => {
+      const bgColor = clsx(
+        hiddenGenres.includes(genre) ? "bg-red-700" : "bg-green-700"
+      )
+
       return (
-        <button className="bg-red-500 rounded-lg">
+        <button
+          onClick={() => toggleGenreHidden(genre)}
+          className={`${bgColor} bg-green-700 rounded-lg`}>
           <p className="p-3 w-full font-bold">{capitalize(genre)}</p>
         </button>
       )
@@ -196,15 +232,15 @@ const App = () => {
     }, [])
 
     // add genre filters
-    const genreFilters = uniqueGenres.map((genre) => {
+    const genreFilters = uniqueGenres.map((genre, index) => {
       return (
-        <FilterButton genre={genre} />
+        <FilterButton key={`${genre}-${index}`} genre={genre} />
       )
     })
 
     return (
       <div className="fixed left-0 bottom-0 w-50 h-min bg-gray-900 rounded-2xl p-2">
-        <p className="text-center mb-2">Filter by genre</p>
+        <p className="text-center mb-2">Click a genre to hide it</p>
         <div className="flex flex-col w-full gap-2">
           {genreFilters}
         </div>
@@ -228,20 +264,20 @@ const App = () => {
 
       {
         artists.length > 0 ? (
-          <>
-            <div>
-              <div className="flex">
+          <div>
+            <div className="flex flex-col items-center">
+              <div className="flex justify-center">
                 {mostMainstreamCard}
                 {mostNicheCard}
               </div>
               {topGenreCard}
+              <input
+                type="text"
+                placeholder="Filter search..."
+                onChange={onFilterSearch}
+                className="text-center pl-4 text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600 mb-10"
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Filter search..."
-              onChange={onFilterSearch}
-              className="text-center text-white focus:outline-none border-0 m-4 p-2 bg-gray-900 rounded-full placeholder:text-gray-600"
-            />
             <table className="border-separate border-spacing-2">
               <thead>
                 <tr className="text-center text-gray-500">
@@ -256,7 +292,7 @@ const App = () => {
                 {artistCards}
               </tbody>
             </table>
-          </>
+          </div>
         ) : loader
 
       }

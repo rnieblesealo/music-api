@@ -1,7 +1,9 @@
 import { getTopArtists, getSpotifyArtistInfo } from "./scripts/music-search"
 import { useState, useEffect, useRef } from "react"
+import React from "react"
 import ArtistCard from "./components/ArtistCard"
 import StatCard from "./components/StatCard"
+import FollowerFilter from "./components/FollowerFilter"
 import capitalize from "./scripts/capitalize"
 import clsx from "clsx"
 
@@ -16,10 +18,13 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [hiddenGenres, setHiddenGenres] = useState([])
 
+  const [minFollowers, setMinFollowers] = useState(null)
+  const [maxFollowers, setMaxFollowers] = useState(null)
+
   const inputRef = useRef(null)
 
   const loader = (
-    <div className="flex items-center justify-center w-full h-full min-h-50">
+    <div className="flex items-center justify-center w-full h-full min-h-20">
       <div className="loader" />
     </div>
   )
@@ -132,9 +137,23 @@ const App = () => {
           .join("")
           .toLowerCase()
           .includes(searchTerm)
+      }).filter((artist) => {
+        const followCount = artist.followers
+
+        // if no set bounds dont filter
+        if (!minFollowers && !maxFollowers) {
+          return true;
+          // partial bound
+        } else if (minFollowers && !maxFollowers) {
+          return followCount >= minFollowers
+        } else if (!minFollowers && maxFollowers) {
+          return followCount < maxFollowers
+        } else {
+          return followCount >= minFollowers && followCount < maxFollowers
+        }
       })
     )
-  }, [hiddenGenres, artists, searchTerm])
+  }, [hiddenGenres, artists, searchTerm, minFollowers, maxFollowers])
 
   const artistCards = displayedArtists.map((info, index) => {
     return (
@@ -242,19 +261,21 @@ const App = () => {
       <div className="fixed left-0 bottom-0 w-50 h-min bg-gray-900 rounded-2xl p-2">
         <p className="text-center mb-2">Click a genre to hide it</p>
         <div className="flex flex-col w-full gap-2">
-          {genreFilters}
+          {uniqueGenres.length > 0 ? genreFilters : loader}
         </div>
       </div>
     )
   }
 
+
   return (
     <div className="relative flex flex-col items-center text-white p-12 bg-black">
       <GenreFilter />
+      <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
       <h1 className="text-4xl font-extrabold m-4">
         #MyTop12
       </h1>
-      <p className="m-3">Enter someone's username to find out their top 12 on LastFM!</p>
+      <p className="m-3">Enter someone's LastFM username to know what they've been listening to!</p>
       <input
         type="text"
         placeholder="rafaisafar"
@@ -285,7 +306,6 @@ const App = () => {
                   <th className="min-w-30">Play Count</th>
                   <th className="min-w-30">Genre</th>
                   <th className="min-w-30">Followers</th>
-                  <th className="min-w-30">Popularity</th>
                 </tr>
               </thead>
               <tbody>

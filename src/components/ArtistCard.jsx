@@ -21,8 +21,7 @@ const ArtistCard = ({ data, rank }) => {
       </td>
       <td>{(data && data.playCount) ?? <Unk />}</td>
       <td>{(data && data.genres && data.genres.length > 0) ? capitalize(data.genres[0]) : <Unk />}</td>
-      <td>{(data && data.followers) ?? <Unk />}</td>
-      <td>{(data && data.popularity) ?? <Unk />}</td>
+      <td>{(data && data.followers.toLocaleString()) ?? <Unk />}</td>
     </tr>
   )
 }

@@ -12,11 +12,11 @@ const FollowerFilter = ({ setMinFollowers, setMaxFollowers }) => {
 
   function updateMaxFollowers(e) {
     if (e.target.value === "") {
-      setMinFollowers(null)
+      setMaxFollowers(null)
     } else {
       const val = parseInt(e.target.value)
       if (!isNaN(val)) {
-        setMinFollowers(val)
+        setMaxFollowers(val)
       }
     }
   }

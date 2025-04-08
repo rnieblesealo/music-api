@@ -12,6 +12,8 @@ const App = () => {
   const [mostNiche, setMostNiche] = useState(null)
   const [topGenre, setTopGenre] = useState(null)
 
+  const [hiddenGenres, setHiddenGenres] = useState([])
+
   const inputRef = useRef(null)
 
   const loader = (
@@ -169,8 +171,50 @@ const App = () => {
     )
   }
 
+  const GenreFilter = () => {
+    const FilterButton = ({ genre }) => {
+      return (
+        <button className="bg-red-500 rounded-lg">
+          <p className="p-3 w-full font-bold">{capitalize(genre)}</p>
+        </button>
+      )
+    }
+
+    // get unique genres
+    const uniqueGenres = artists.map((artist) => {
+      if (artist.genres && artist.genres.length > 0) {
+        return artist.genres[0]
+      }
+
+      return null;
+    }).reduce((arr, curr) => {
+      if (curr !== null && !arr.includes(curr)) {
+        arr.push(curr)
+      }
+
+      return arr;
+    }, [])
+
+    // add genre filters
+    const genreFilters = uniqueGenres.map((genre) => {
+      return (
+        <FilterButton genre={genre} />
+      )
+    })
+
+    return (
+      <div className="fixed left-0 bottom-0 w-50 h-min bg-gray-900 rounded-2xl p-2">
+        <p className="text-center mb-2">Filter by genre</p>
+        <div className="flex flex-col w-full gap-2">
+          {genreFilters}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col items-center text-white p-12 bg-black">
+    <div className="relative flex flex-col items-center text-white p-12 bg-black">
+      <GenreFilter />
       <h1 className="text-4xl font-extrabold m-4">
         #MyTop12
       </h1>
@@ -213,7 +257,7 @@ const App = () => {
               </tbody>
             </table>
           </>
-      ) : loader
+        ) : loader
 
       }
     </div>

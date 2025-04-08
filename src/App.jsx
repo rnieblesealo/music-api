@@ -14,6 +14,12 @@ const App = () => {
 
   const inputRef = useRef(null)
 
+  const loader = (
+    <div className="flex items-center justify-center w-full h-full min-h-50">
+      <div className="loader" />
+    </div>
+  )
+
   // handle default artist info
   useEffect(() => {
     async function getArtistInfo() {
@@ -92,6 +98,7 @@ const App = () => {
     // not on change to avoid api call abuse
     function handleSearchSubmit(e) {
       if (e.key === "Enter") {
+        resetEverything()
         setArtists([])
         setUsername(e.target.value)
       }
@@ -134,6 +141,14 @@ const App = () => {
     </div>
   )
 
+  function resetEverything() {
+    setArtists([])
+    setDisplayedArtists([])
+    setMostMainstream("")
+    setMostNiche("")
+    setTopGenre("")
+  }
+
   function onFilterSearch(e) {
     setDisplayedArtists(
       artists.filter((artist) => {
@@ -166,33 +181,40 @@ const App = () => {
         ref={(me) => inputRef.current = me}
         className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
       />
-      <div className="">
-        <div className="flex">
-          {mostMainstreamCard}
-          {mostNicheCard}
-        </div>
-        {topGenreCard}
-      </div>
-      <input
-        type="text"
-        placeholder="Filter search..."
-        onChange={onFilterSearch}
-        className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
-      />
-      <table className="border-separate border-spacing-2">
-        <thead>
-          <tr className="text-center">
-            <th className="min-w-50">Artist</th>
-            <th className="min-w-30">Play Count</th>
-            <th className="min-w-30">Genre</th>
-            <th className="min-w-30">Followers</th>
-            <th className="min-w-30">Popularity</th>
-          </tr>
-        </thead>
-        <tbody>
-          {artistCards}
-        </tbody>
-      </table>
+
+      {
+        displayedArtists.length > 0 ? (
+          <>
+            <div>
+              <div className="flex">
+                {mostMainstreamCard}
+                {mostNicheCard}
+              </div>
+              {topGenreCard}
+            </div>
+            <input
+              type="text"
+              placeholder="Filter search..."
+              onChange={onFilterSearch}
+              className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500"
+            />
+            <table className="border-separate border-spacing-2">
+              <thead>
+                <tr className="text-center">
+                  <th className="min-w-50">Artist</th>
+                  <th className="min-w-30">Play Count</th>
+                  <th className="min-w-30">Genre</th>
+                  <th className="min-w-30">Followers</th>
+                  <th className="min-w-30">Popularity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {artistCards}
+              </tbody>
+            </table>
+          </>
+        ) : loader
+      }
     </div>
   )
 }

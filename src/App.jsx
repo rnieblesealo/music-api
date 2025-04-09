@@ -11,6 +11,8 @@ import capitalize from "./scripts/capitalize"
 import { FaLastfmSquare } from "react-icons/fa"
 import { FaSadTear } from "react-icons/fa";
 
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts"
+
 const App = () => {
   /* -- GENERAL --------- */
   const [username, setUsername] = useState("rafaisafar")
@@ -30,6 +32,9 @@ const App = () => {
 
   const [didFindArtistData, setDidFindArtistData] = useState(true)
 
+  /* -- CHART DATA ------ */
+  const [popVsListens, setPopVsListens] = useState([])
+
   const inputRef = useRef(null)
 
   const UserNotFoundPlaceholder = () => {
@@ -47,14 +52,14 @@ const App = () => {
     )
   }
 
-  // fetch initial artist info 
+  // fetch info for given username
   useEffect(() => {
     async function getArtistInfo() {
       try {
         // get all the names
         const lastFmTopArtists = await getTopArtists(username)
 
-        if (!lastFmTopArtists || lastFmTopArtists.length === 0){
+        if (!lastFmTopArtists || lastFmTopArtists.length === 0) {
           throw new Error("LastFM artist data is null!")
         }
 
@@ -116,6 +121,24 @@ const App = () => {
           })
 
           return mostFreqItem;
+        })
+
+        // set chart data
+        setPopVsListens(() => {
+          const chartData = artistInfo.map((info) => {
+            if (!info.playCount) {
+              return null;
+            }
+
+            return {
+              playCount: parseInt(info.playCount),
+              popularity: info.popularity
+            }
+          })
+
+          console.log(chartData)
+
+          return (chartData)
         })
       } catch (err) {
         console.warn("Unable to fetch user artist data.", err)
@@ -243,8 +266,75 @@ const App = () => {
     </div>
   )
 
+  const popVsPlayChart = (
+    <div className="flex flex-col items-center text-center">
+      <h2 className="text-lg font-bold">Popularity vs. Playcount</h2>
+      <p className="text-gray-500">See your listening patterns change based on artist popularity!</p>
+      <LineChart
+        width={500}
+        height={300}
+        data={popVsListens}
+        margin={{
+          top: 30,
+          bottom: 30,
+          right: 65
+        }}
+      >
+        <CartesianGrid
+          stroke="#ffffff"
+          strokeOpacity="0.2"
+          strokeDasharray="3 3"
+        />
+        <XAxis
+          dataKey="playCount"
+          label={{
+            value: 'Play Count',
+            position: 'insideBottom',
+            offset: -15,
+            style: {
+              textAnchor: "middle"
+            }
+          }}
+        />
+        <YAxis
+          label={{
+            value: 'Popularity',
+            angle: -90,
+            position: "insideLeft",
+            offset: 15,
+            style: {
+              textAnchor: "middle"
+            }
+          }} />
+        <Line
+          type="linear"
+          dataKey="popularity"
+          stroke="#1DBE57"
+          strokeWidth="3"
+        />
+      </LineChart>
+    </div>
+  );
+
+  const filters = (
+    <div className="flex flex-col gap-2 max-w-50 m-4 mt-10">
+      <input
+        type="text"
+        placeholder="Filter search..."
+        onChange={onFilterSearch}
+        className="w-full text-center text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600"
+      />
+      <GenreFilter
+        artists={artists}
+        hiddenGenres={hiddenGenres}
+        setHiddenGenres={setHiddenGenres}
+      />
+      <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
+    </div>
+  )
+
   const artistInfoTable = (
-    <div className="w-min">
+    <div className="w-min flex flex-col items-center">
       <div className="flex flex-col items-center">
         <div className="flex justify-center">
           {mostMainstreamCard}
@@ -253,6 +343,7 @@ const App = () => {
         {topGenreCard}
       </div>
       <div className="flex">
+        {filters}
         <table className="h-min w-175 border-separate border-spacing-2">
           <thead>
             <tr className="text-center text-gray-500">
@@ -266,28 +357,11 @@ const App = () => {
             {artistCards}
           </tbody>
         </table>
-        <div className="flex flex-col gap-2 max-w-50">
-          <input
-            type="text"
-            placeholder="Filter search..."
-            onChange={onFilterSearch}
-            className="w-full text-center text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600"
-          />
-          <GenreFilter
-            artists={artists}
-            hiddenGenres={hiddenGenres}
-            setHiddenGenres={setHiddenGenres}
-          />
-          <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
-        </div>
+        {popVsPlayChart}
       </div>
     </div>
   )
 
-  /*
-    <div className="relative flex flex-col items-center text-white p-12 bg-black">
-    </div>
-  */
 
   return (
     <div className="flex justify-center text-white">

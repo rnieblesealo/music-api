@@ -120,11 +120,19 @@ const App = () => {
           // take advantage of counted freqs to set genre distribution data in rechart's format
           setGenreFreqs(() => {
             const freqs = Object.entries(freqCounter).map(([genre, freq]) => {
+              if (!genre || !freq) {
+                return null
+              }
+
               return {
                 name: genre,
                 count: freq
               }
+              // filter out bad data
+            }).filter((datapoint) => {
+              return datapoint !== null;
             })
+
 
             return freqs;
           })
@@ -139,8 +147,9 @@ const App = () => {
 
         // set pop vs. listens chart data 
         setPopVsListens(() => {
+          // put in recharts form and drop any null data
           const chartData = artistInfo.map((info) => {
-            if (!info.playCount) {
+            if (!info.playCount || !info.popularity) {
               return null;
             }
 
@@ -148,7 +157,9 @@ const App = () => {
               playCount: parseInt(info.playCount),
               popularity: info.popularity
             }
-          })
+          }).filter((data) => {
+            return data !== null
+          }).sort((a, b) => a.playCount - b.playCount);
 
           return (chartData)
         })
@@ -281,7 +292,7 @@ const App = () => {
   const popVsPlayChart = (
     <div className="flex flex-col items-center text-center">
       <h2 className="text-lg font-bold">Popularity vs. Playcount</h2>
-      <p className="text-gray-500">See your listening patterns change based on artist popularity!</p>
+      <p className="text-gray-500">See listening patterns change based on artist popularity!</p>
       <LineChart
         width={500}
         height={300}
@@ -319,7 +330,7 @@ const App = () => {
             }
           }} />
         <Line
-          type="linear"
+          type="monotone"
           dataKey="popularity"
           stroke="#1DBE57"
           strokeWidth="3"
@@ -331,7 +342,7 @@ const App = () => {
   const genreFreqChart = (
     <div className="flex flex-col items-center text-center">
       <h2 className="text-lg font-bold">Genres</h2>
-      <p className="text-gray-500">What genres are you most into?</p>
+      <p className="text-gray-500">What genres is this user most into?</p>
       <BarChart
         width={500}
         height={300}

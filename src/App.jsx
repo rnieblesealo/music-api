@@ -9,6 +9,7 @@ import GenreFilter from "./components/GenreFilter"
 import capitalize from "./scripts/capitalize"
 
 import { FaLastfmSquare } from "react-icons/fa"
+import { FaSadTear } from "react-icons/fa";
 
 const App = () => {
   /* -- GENERAL --------- */
@@ -27,7 +28,24 @@ const App = () => {
   const [minFollowers, setMinFollowers] = useState(0)
   const [maxFollowers, setMaxFollowers] = useState(0)
 
+  const [didFindArtistData, setDidFindArtistData] = useState(true)
+
   const inputRef = useRef(null)
+
+  const UserNotFoundPlaceholder = () => {
+    return (
+      <p className="flex flex-col items-center justify-center text-red-400 font-bold">
+        <span className="flex items-center justify-center">
+          Could not fetch user data
+          <span className="ml-2">
+            <FaSadTear />
+          </span>
+        </span>
+        <br />
+        Make sure you typed a valid LastFM username!
+      </p>
+    )
+  }
 
   // fetch initial artist info 
   useEffect(() => {
@@ -96,7 +114,8 @@ const App = () => {
           return mostFreqItem;
         })
       } catch (err) {
-        console.error(err)
+        console.error("Unable to fetch user artist data: ", err)
+        setDidFindArtistData(false)
       }
     }
 
@@ -170,11 +189,12 @@ const App = () => {
   function resetEverything() {
     setArtists([])
     setDisplayedArtists([])
-    setMostMainstream("")
-    setMostNiche("")
+    setMostMainstream({})
+    setMostNiche({})
     setTopGenre("")
     setSearchTerm("")
     setHiddenGenres([])
+    setDidFindArtistData(true)
   }
 
   function onFilterSearch(e) {
@@ -278,10 +298,13 @@ const App = () => {
           ref={(me) => inputRef.current = me}
           className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500 placeholder:font-normal"
         />
-        {artists.length > 0 ?
-          artistInfoTable :
-          <Loader />
-        }
+        {didFindArtistData ? (
+          artists.length > 0 ?
+            artistInfoTable :
+            <Loader />
+        ) : (
+          <UserNotFoundPlaceholder />
+        )}
       </div>
     </div>
   )

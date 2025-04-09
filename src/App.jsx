@@ -1,12 +1,12 @@
 import { getTopArtists, getSpotifyArtistInfo } from "./scripts/music-search"
 import { useState, useEffect, useRef } from "react"
-import capitalize from "./scripts/capitalize"
 import React from "react"
 import ArtistCard from "./components/ArtistCard"
 import StatCard from "./components/StatCard"
 import FollowerFilter from "./components/FollowerFilter"
 import Loader from "./components/Loader"
 import GenreFilter from "./components/GenreFilter"
+import capitalize from "./scripts/capitalize"
 
 import { FaLastfmSquare } from "react-icons/fa"
 
@@ -17,15 +17,15 @@ const App = () => {
   const [displayedArtists, setDisplayedArtists] = useState([])
 
   /* -- SUMMARY STATS --  */
-  const [mostMainstream, setMostMainstream] = useState(null)
-  const [mostNiche, setMostNiche] = useState(null)
-  const [topGenre, setTopGenre] = useState(null)
+  const [mostMainstream, setMostMainstream] = useState({})
+  const [mostNiche, setMostNiche] = useState({})
+  const [topGenre, setTopGenre] = useState("")
 
   /* -- FILTERING ------- */
   const [searchTerm, setSearchTerm] = useState("")
   const [hiddenGenres, setHiddenGenres] = useState([])
-  const [minFollowers, setMinFollowers] = useState(null)
-  const [maxFollowers, setMaxFollowers] = useState(null)
+  const [minFollowers, setMinFollowers] = useState(0)
+  const [maxFollowers, setMaxFollowers] = useState(0)
 
   const inputRef = useRef(null)
 
@@ -167,37 +167,6 @@ const App = () => {
     )
   }, [hiddenGenres, artists, searchTerm, minFollowers, maxFollowers])
 
-  const artistCards = displayedArtists?.map((info, index) => {
-    return (
-      <ArtistCard
-        key={`${index}-${info.name}`}
-        data={info}
-        rank={index}
-      />
-    )
-  })
-
-  const mostMainstreamCard = mostMainstream && (
-    <StatCard
-      data={mostMainstream}
-      heading="Most mainstream"
-    />
-  )
-
-  const mostNicheCard = mostNiche && (
-    <StatCard
-      data={mostNiche}
-      heading="Most niche"
-    />
-  )
-
-  const topGenreCard = topGenre && (
-    <div className="flex flex-col items-center mb-8">
-      <p>Most listened to genre</p>
-      <p className="text-2xl font-bold">{topGenre ? capitalize(topGenre) : "unknown"}</p>
-    </div>
-  )
-
   function resetEverything() {
     setArtists([])
     setDisplayedArtists([])
@@ -219,14 +188,70 @@ const App = () => {
     )
   }
 
-  return (
-    <div className="relative flex flex-col items-center text-white p-12 bg-black">
-      <GenreFilter
-        artists={artists}
-        hiddenGenres={hiddenGenres}
-        setHiddenGenres={setHiddenGenres}
+  const artistCards = displayedArtists?.map((info, index) => {
+    return (
+      <ArtistCard
+        key={`${index}-${info.name}`}
+        data={info}
+        rank={index}
       />
-      <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
+    )
+  })
+
+  const mostMainstreamCard = (
+    <StatCard
+      data={mostMainstream}
+      heading="Most mainstream"
+    />
+  )
+
+  const mostNicheCard = (
+    <StatCard
+      data={mostNiche}
+      heading="Most niche"
+    />
+  )
+
+  const topGenreCard = (
+    <div className="flex flex-col items-center mb-8">
+      <p>Most listened to genre</p>
+      <p className="text-2xl font-bold">{topGenre ? capitalize(topGenre) : "unknown"}</p>
+    </div>
+  )
+
+  const artistInfoTable = (
+    <div>
+      <div className="flex flex-col items-center">
+        <div className="flex justify-center">
+          {mostMainstreamCard}
+          {mostNicheCard}
+        </div>
+        {topGenreCard}
+        <input
+          type="text"
+          placeholder="Filter search..."
+          onChange={onFilterSearch}
+          className="text-center pl-4 text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600 mb-10"
+        />
+      </div>
+      <table className="border-separate border-spacing-2">
+        <thead>
+          <tr className="text-center text-gray-500">
+            <th className="min-w-50">Artist</th>
+            <th className="min-w-30">Play Count</th>
+            <th className="min-w-30">Genre</th>
+            <th className="min-w-30">Followers</th>
+          </tr>
+        </thead>
+        <tbody>
+          {artistCards}
+        </tbody>
+      </table>
+    </div>
+  )
+
+  /*
+    <div className="relative flex flex-col items-center text-white p-12 bg-black">
       <h1 className="text-4xl font-extrabold m-4 flex gap-2 items-center">
         #MyTop12 <FaLastfmSquare />
       </h1>
@@ -237,40 +262,20 @@ const App = () => {
         ref={(me) => inputRef.current = me}
         className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500 placeholder:font-normal"
       />
+      {artists.length > 0 ?
+        artistInfoTable :
+        <Loader />}
+    </div>
+  */
 
-      {
-        artists.length > 0 ? (
-          <div>
-            <div className="flex flex-col items-center">
-              <div className="flex justify-center">
-                {mostMainstreamCard}
-                {mostNicheCard}
-              </div>
-              {topGenreCard}
-              <input
-                type="text"
-                placeholder="Filter search..."
-                onChange={onFilterSearch}
-                className="text-center pl-4 text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600 mb-10"
-              />
-            </div>
-            <table className="border-separate border-spacing-2">
-              <thead>
-                <tr className="text-center text-gray-500">
-                  <th className="min-w-50">Artist</th>
-                  <th className="min-w-30">Play Count</th>
-                  <th className="min-w-30">Genre</th>
-                  <th className="min-w-30">Followers</th>
-                </tr>
-              </thead>
-              <tbody>
-                {artistCards}
-              </tbody>
-            </table>
-          </div>
-        ) : <Loader />
-
-      }
+  return (
+    <div className="grid grid-cols-2 text-white">
+      <GenreFilter
+        artists={artists}
+        hiddenGenres={hiddenGenres}
+        setHiddenGenres={setHiddenGenres}
+      />
+      <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
     </div>
   )
 }

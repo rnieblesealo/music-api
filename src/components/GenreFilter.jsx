@@ -1,6 +1,5 @@
 import clsx from "clsx"
 import capitalize from "../scripts/capitalize"
-import Loader from "../components/Loader"
 
 const GenreFilter = ({
   artists,
@@ -57,10 +56,10 @@ const GenreFilter = ({
   })
 
   return (
-    <div className="fixed left-0 bottom-0 w-50 h-min bg-gray-900 rounded-2xl p-2">
+    <div className="min-w-50 w-50 h-min bg-gray-900 rounded-2xl p-2">
       <p className="text-center mb-2">Click a genre to hide it</p>
       <div className="flex flex-col w-full gap-2">
-        {uniqueGenres.length > 0 ? genreFilters : <Loader />}
+        {genreFilters} 
       </div>
     </div>
   )

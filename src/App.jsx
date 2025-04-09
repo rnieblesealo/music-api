@@ -220,62 +220,69 @@ const App = () => {
   )
 
   const artistInfoTable = (
-    <div>
+    <div className="w-min">
       <div className="flex flex-col items-center">
         <div className="flex justify-center">
           {mostMainstreamCard}
           {mostNicheCard}
         </div>
         {topGenreCard}
-        <input
-          type="text"
-          placeholder="Filter search..."
-          onChange={onFilterSearch}
-          className="text-center pl-4 text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600 mb-10"
-        />
       </div>
-      <table className="border-separate border-spacing-2">
-        <thead>
-          <tr className="text-center text-gray-500">
-            <th className="min-w-50">Artist</th>
-            <th className="min-w-30">Play Count</th>
-            <th className="min-w-30">Genre</th>
-            <th className="min-w-30">Followers</th>
-          </tr>
-        </thead>
-        <tbody>
-          {artistCards}
-        </tbody>
-      </table>
+      <div className="flex">
+        <table className="h-min w-175 border-separate border-spacing-2">
+          <thead>
+            <tr className="text-center text-gray-500">
+              <th className="min-w-50">Artist</th>
+              <th className="min-w-30">Play Count</th>
+              <th className="min-w-30">Genre</th>
+              <th className="min-w-30">Followers</th>
+            </tr>
+          </thead>
+          <tbody>
+            {artistCards}
+          </tbody>
+        </table>
+        <div className="flex flex-col gap-2 max-w-50">
+          <input
+            type="text"
+            placeholder="Filter search..."
+            onChange={onFilterSearch}
+            className="w-full text-center text-white focus:outline-none border-0 p-1 bg-gray-900 rounded-2xl placeholder:text-gray-600"
+          />
+          <GenreFilter
+            artists={artists}
+            hiddenGenres={hiddenGenres}
+            setHiddenGenres={setHiddenGenres}
+          />
+          <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
+        </div>
+      </div>
     </div>
   )
 
   /*
     <div className="relative flex flex-col items-center text-white p-12 bg-black">
-      <h1 className="text-4xl font-extrabold m-4 flex gap-2 items-center">
-        #MyTop12 <FaLastfmSquare />
-      </h1>
-      <p className="m-3">Enter someone's LastFM username to know what they've been listening to!</p>
-      <input
-        type="text"
-        placeholder="rafaisafar"
-        ref={(me) => inputRef.current = me}
-        className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500 placeholder:font-normal"
-      />
-      {artists.length > 0 ?
-        artistInfoTable :
-        <Loader />}
     </div>
   */
 
   return (
-    <div className="grid grid-cols-2 text-white">
-      <GenreFilter
-        artists={artists}
-        hiddenGenres={hiddenGenres}
-        setHiddenGenres={setHiddenGenres}
-      />
-      <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
+    <div className="flex justify-center text-white">
+      <div className="flex flex-col items-center">
+        <h1 className="text-4xl font-extrabold m-4 flex gap-2 items-center">
+          #MyTop12 <FaLastfmSquare />
+        </h1>
+        <p className="m-3 w-100 text-center text-gray-400">Enter someone's LastFM username to know what they've been listening to!</p>
+        <input
+          type="text"
+          placeholder="rafaisafar"
+          ref={(me) => inputRef.current = me}
+          className="text-center text-black focus:outline-none border-0 m-4 p-2 bg-white rounded-full placeholder:text-gray-500 placeholder:font-normal"
+        />
+        {artists.length > 0 ?
+          artistInfoTable :
+          <Loader />
+        }
+      </div>
     </div>
   )
 }

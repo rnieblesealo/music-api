@@ -22,7 +22,7 @@ const FollowerFilter = ({ setMinFollowers, setMaxFollowers }) => {
   }
 
   return (
-    <div className="fixed right-0 bottom-0 w-50 h-min bg-gray-900 rounded-2xl p-2">
+    <div className="min-w-50 w-50 h-min bg-gray-900 rounded-2xl p-2">
       <p className="text-center my-2">Filter by follower count</p>
       <div className="flex flex-col gap-1 ml-4 mr-4 mb-4">
         <div className="flex">

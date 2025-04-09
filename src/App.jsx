@@ -1,37 +1,35 @@
 import { getTopArtists, getSpotifyArtistInfo } from "./scripts/music-search"
 import { useState, useEffect, useRef } from "react"
 import capitalize from "./scripts/capitalize"
-import clsx from "clsx"
 import React from "react"
 import ArtistCard from "./components/ArtistCard"
 import StatCard from "./components/StatCard"
 import FollowerFilter from "./components/FollowerFilter"
+import Loader from "./components/Loader"
+import GenreFilter from "./components/GenreFilter"
 
 import { FaLastfmSquare } from "react-icons/fa"
 
 const App = () => {
+  /* -- GENERAL --------- */
   const [username, setUsername] = useState("rafaisafar")
   const [artists, setArtists] = useState([])
   const [displayedArtists, setDisplayedArtists] = useState([])
+
+  /* -- SUMMARY STATS --  */
   const [mostMainstream, setMostMainstream] = useState(null)
   const [mostNiche, setMostNiche] = useState(null)
   const [topGenre, setTopGenre] = useState(null)
 
+  /* -- FILTERING ------- */
   const [searchTerm, setSearchTerm] = useState("")
   const [hiddenGenres, setHiddenGenres] = useState([])
-
   const [minFollowers, setMinFollowers] = useState(null)
   const [maxFollowers, setMaxFollowers] = useState(null)
 
   const inputRef = useRef(null)
 
-  const loader = (
-    <div className="flex items-center justify-center w-full h-full min-h-20">
-      <div className="loader" />
-    </div>
-  )
-
-  // handle default artist info
+  // fetch initial artist info 
   useEffect(() => {
     async function getArtistInfo() {
       try {
@@ -56,25 +54,27 @@ const App = () => {
           })
         )
 
+        // set all artist info 
         setArtists(artistInfo)
 
-        // displayed artists match
+        // match displayed artists with fetched artist info 
         setDisplayedArtists(artistInfo)
 
-        // set most mainstream (greatest popularity)
+        // get most mainstream (highest popularity)
         setMostMainstream(
           artistInfo.reduce((max, curr) => {
             return curr.popularity > max.popularity ? curr : max;
           })
         )
 
-        // set most niche (least popularity)
+        // set most niche (lowest popularity)
         setMostNiche(
           artistInfo.reduce((min, curr) => {
             return curr.popularity < min.popularity ? curr : min;
           })
         )
 
+        // set top genre (most frequently ocurring first genre entry)
         setTopGenre(() => {
           // get top match genre for each artist
           const topGenres = artistInfo.map((info) => {
@@ -103,7 +103,7 @@ const App = () => {
     getArtistInfo()
   }, [username])
 
-  // handle search submit
+  // fetch newly searched info
   useEffect(() => {
     // submit search on enter press
     // not on change to avoid api call abuse
@@ -120,7 +120,7 @@ const App = () => {
     }
   }, [])
 
-  // handle filter
+  // handle display filtering 
   useEffect(() => {
     setDisplayedArtists(
       artists.filter((artist) => {
@@ -141,26 +141,33 @@ const App = () => {
           .includes(searchTerm)
       }).filter((artist) => {
         const followCount = artist.followers
-        if (!followCount) {
-          return false;
-        }
 
-        // if no set bounds dont filter
+        // if no set bounds...
         if (!minFollowers && !maxFollowers) {
+          // ...don't hide anything, regardless of follower count info
           return true;
-          // partial bound
-        } else if (minFollowers && !maxFollowers) {
-          return followCount >= minFollowers
-        } else if (!minFollowers && maxFollowers) {
-          return followCount < maxFollowers
+
+          // however, if any bound is set...
         } else {
-          return followCount >= minFollowers && followCount < maxFollowers
+          // ...and follow count info doesn't exist, hide the row; we want to see strictly what we're looking for! 
+          if (!followCount) {
+            return false;
+            // and of course, if follower bounds and follow count exist, test normally :)
+          } else {
+            if (minFollowers && !maxFollowers) {
+              return followCount >= minFollowers
+            } else if (!minFollowers && maxFollowers) {
+              return followCount < maxFollowers
+            } else {
+              return followCount >= minFollowers && followCount < maxFollowers
+            }
+          }
         }
       })
     )
   }, [hiddenGenres, artists, searchTerm, minFollowers, maxFollowers])
 
-  const artistCards = displayedArtists.map((info, index) => {
+  const artistCards = displayedArtists?.map((info, index) => {
     return (
       <ArtistCard
         key={`${index}-${info.name}`}
@@ -212,70 +219,13 @@ const App = () => {
     )
   }
 
-  const GenreFilter = () => {
-    function toggleGenreHidden(genre) {
-      // if given genre not hidden, hide it
-      if (!hiddenGenres.includes(genre)) {
-        setHiddenGenres((prev) => [...prev, genre])
-        // if it is hidden, unhide it
-      } else {
-        setHiddenGenres((prev) => {
-          // remove passed genre from list...
-          return prev.filter((item) => item !== genre)
-        })
-      }
-    }
-
-    const FilterButton = ({ genre }) => {
-      const bgColor = clsx(
-        hiddenGenres.includes(genre) ? "bg-red-700" : "bg-green-700"
-      )
-
-      return (
-        <button
-          onClick={() => toggleGenreHidden(genre)}
-          className={`${bgColor} bg-green-700 rounded-lg`}>
-          <p className="p-3 w-full font-bold">{capitalize(genre)}</p>
-        </button>
-      )
-    }
-
-    // get unique genres
-    const uniqueGenres = artists.map((artist) => {
-      if (artist.genres && artist.genres.length > 0) {
-        return artist.genres[0]
-      }
-
-      return null;
-    }).reduce((arr, curr) => {
-      if (curr !== null && !arr.includes(curr)) {
-        arr.push(curr)
-      }
-
-      return arr;
-    }, [])
-
-    // add genre filters
-    const genreFilters = uniqueGenres.map((genre, index) => {
-      return (
-        <FilterButton key={`${genre}-${index}`} genre={genre} />
-      )
-    })
-
-    return (
-      <div className="fixed left-0 bottom-0 w-50 h-min bg-gray-900 rounded-2xl p-2">
-        <p className="text-center mb-2">Click a genre to hide it</p>
-        <div className="flex flex-col w-full gap-2">
-          {uniqueGenres.length > 0 ? genreFilters : loader}
-        </div>
-      </div>
-    )
-  }
-
-
   return (
     <div className="relative flex flex-col items-center text-white p-12 bg-black">
-      <GenreFilter />
+      <GenreFilter
+        artists={artists}
+        hiddenGenres={hiddenGenres}
+        setHiddenGenres={setHiddenGenres}
+      />
       <FollowerFilter setMinFollowers={setMinFollowers} setMaxFollowers={setMaxFollowers} />
       <h1 className="text-4xl font-extrabold m-4 flex gap-2 items-center">
         #MyTop12 <FaLastfmSquare />
@@ -318,7 +268,7 @@ const App = () => {
               </tbody>
             </table>
           </div>
-        ) : loader
+        ) : <Loader />
 
       }
     </div>

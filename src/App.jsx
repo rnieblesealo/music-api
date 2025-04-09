@@ -11,7 +11,7 @@ import capitalize from "./scripts/capitalize"
 import { FaLastfmSquare } from "react-icons/fa"
 import { FaSadTear } from "react-icons/fa";
 
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts"
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, BarChart, Bar, LabelList } from "recharts"
 
 const App = () => {
   /* -- GENERAL --------- */
@@ -34,6 +34,7 @@ const App = () => {
 
   /* -- CHART DATA ------ */
   const [popVsListens, setPopVsListens] = useState([])
+  const [genreFreqs, setGenreFreqs] = useState([])
 
   const inputRef = useRef(null)
 
@@ -116,6 +117,19 @@ const App = () => {
             return counter;
           }, {}) // brackets are initialization of dict we use inside func
 
+          // take advantage of counted freqs to set genre distribution data in rechart's format
+          setGenreFreqs(() => {
+            const freqs = Object.entries(freqCounter).map(([genre, freq]) => {
+              return {
+                name: genre,
+                count: freq
+              }
+            })
+
+            return freqs;
+          })
+
+          // get most freq item
           const mostFreqItem = Object.keys(freqCounter).reduce((max, item) => {
             return freqCounter[item] > freqCounter[max] ? item : max;
           })
@@ -123,7 +137,7 @@ const App = () => {
           return mostFreqItem;
         })
 
-        // set chart data
+        // set pop vs. listens chart data 
         setPopVsListens(() => {
           const chartData = artistInfo.map((info) => {
             if (!info.playCount) {
@@ -135,8 +149,6 @@ const App = () => {
               popularity: info.popularity
             }
           })
-
-          console.log(chartData)
 
           return (chartData)
         })
@@ -316,6 +328,70 @@ const App = () => {
     </div>
   );
 
+  const genreFreqChart = (
+    <div className="flex flex-col items-center text-center">
+      <h2 className="text-lg font-bold">Genres</h2>
+      <p className="text-gray-500">What genres are you most into?</p>
+      <BarChart
+        width={500}
+        height={300}
+        data={genreFreqs} // Your frequency data, e.g. [{ name: 'mexican rock', count: 3 }, ...]
+        margin={{
+          top: 30,
+          bottom: 50,
+          right: 65,
+        }}
+      >
+        <CartesianGrid
+          stroke="#ffffff"
+          strokeOpacity="0.2"
+          strokeDasharray="3 3"
+        />
+        <XAxis
+          dataKey="name"
+          label={{
+            value: 'Genre',
+            position: 'insideBottom',
+            offset: -35,
+            style: {
+              textAnchor: "middle",
+            },
+          }}
+          angle={-45} // Rotates the genre labels to avoid overlap
+          tick={{
+            dx: 0,
+            dy: 0,
+            fill: "#fff",
+            opacity: 0.5
+          }}
+        />
+        <YAxis
+          label={{
+            value: 'Frequency',
+            angle: -90,
+            position: "insideLeft",
+            offset: 15,
+            style: {
+              textAnchor: "middle",
+            }
+          }}
+        />
+        <Bar
+          dataKey="count"
+          fill="#1DBE57" // You can adjust this color
+          barSize={25} // Optional: adjust bar thickness
+        />
+      </BarChart>
+    </div>
+  )
+
+  const charts = (
+    <div className="flex flex-col">
+      {popVsPlayChart}
+      {genreFreqChart}
+    </div>
+  )
+
   const filters = (
     <div className="flex flex-col gap-2 max-w-50 m-4 mt-10">
       <input
@@ -357,7 +433,7 @@ const App = () => {
             {artistCards}
           </tbody>
         </table>
-        {popVsPlayChart}
+        {charts}
       </div>
     </div>
   )

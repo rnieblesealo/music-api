@@ -54,6 +54,10 @@ const App = () => {
         // get all the names
         const lastFmTopArtists = await getTopArtists(username)
 
+        if (!lastFmTopArtists || lastFmTopArtists.length === 0){
+          throw new Error("LastFM artist data is null!")
+        }
+
         // pack image, name kv pairs in array 
         const artistInfo = await Promise.all(
           lastFmTopArtists.map(async (artistData) => {
@@ -114,7 +118,7 @@ const App = () => {
           return mostFreqItem;
         })
       } catch (err) {
-        console.error("Unable to fetch user artist data: ", err)
+        console.warn("Unable to fetch user artist data.", err)
         setDidFindArtistData(false)
       }
     }

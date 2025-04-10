@@ -431,7 +431,7 @@ const Dashboard = () => {
       </div>
       <div className="flex">
         {filters}
-        <table className="h-min w-175 border-separate border-spacing-2">
+        <table className="h-min max-w-125 border-separate border-spacing-2">
           <thead>
             <tr className="text-center text-gray-500">
               <th className="min-w-50">Artist</th>
@@ -448,7 +448,6 @@ const Dashboard = () => {
       </div>
     </div>
   )
-
 
   return (
     <div className="flex justify-center text-white">

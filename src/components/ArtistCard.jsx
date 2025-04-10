@@ -2,14 +2,10 @@ import capitalize from '../scripts/capitalize'
 
 import { useNavigate } from "react-router-dom"
 
-import { FaQuestion } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
+import UnknownFiller from "./UnknownFiller"
 
 const ArtistCard = ({ data, rank }) => {
-  const UnknownFiller = () => (
-    <p className="text-gray-600 flex items-center justify-center"><FaQuestion /></p>
-  )
-
   // do img placeholder if failed to find
   const img = data.image ? (
     <img

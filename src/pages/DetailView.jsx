@@ -2,96 +2,101 @@ import { useParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { getSpotifyArtistInfoById } from "../scripts/music-search"
 
-import { FaQuestion } from "react-icons/fa";
+import CircularProgress from "../components/CircularProgress"
+import UnknownFiller from "../components/UnknownFiller"
+import Loader from "../components/Loader"
+import capitalize from "../scripts/capitalize"
+
 import { IoPersonSharp } from "react-icons/io5";
 
 const DetailView = () => {
   let params = useParams()
 
+  const [didLoadData, setDidLoadData] = useState(false)
+  const [name, setName] = useState("")
+  const [image, setImage] = useState("")
+  const [genres, setGenres] = useState([])
+  const [followers, setFollowers] = useState(-1)
+  const [popularity, setPopularity] = useState(-1)
+
   useEffect(() => {
-    async function getArtistInfo() {
-      await getSpotifyArtistInfoById(params.id)
+    async function setArtistInfo() {
+      try {
+        const info = await getSpotifyArtistInfoById(params.id)
+
+        setName(info.name)
+        setImage(info.image)
+        setFollowers(info.followers)
+        setGenres(info.genres)
+        setPopularity(info.popularity)
+      } catch (error) {
+        console.error(error)
+      }
     }
 
-    // getArtistInfo()
-  })
+    setArtistInfo()
+  }, [params.id])
 
-  const CircularProgress = ({ value, max }) => {
-    const radius = 60;
-    const stroke = 15;
-    const normalizedRadius = radius - stroke / 2; // radius as 0-1 val
-    const circumference = 2 * Math.PI * normalizedRadius;
-    const percent = Math.min(Math.max(value / max, 0), 1); // percent as 0-1 val
-    const strokeDashoffset = circumference * (1 - percent); // fill amt based on percent value
+  useEffect(() => {
+    // ensure all data is loaded and ok
+    setDidLoadData(
+      name &&
+      image &&
+      genres &&
+      (!isNaN(followers) && followers >= 0) &&
+      (!isNaN(popularity) && popularity >= 0))
+  }, [followers, genres, image, name, popularity])
 
-    // Color transition: from red (0%) to green (100%)
-    const interpolateColor = (percent) => {
-      const r = Math.round(255 * (1 - percent)); // how much is red
-      const g = Math.round(255 * percent); // how much is green
-      return `rgb(${r}, ${g}, 0)`; // put in full rgb component
-    };
+  const heroImg = image ? (
+    <img
+      src={image}
+      className="w-80 aspect-square object-cover pixelated rounded-2xl mb-10"
+    />
+  ) : (
+    <div className="relative bg-gray-700 w-full h-80 aspect-square flex items-center justify-center">
+      <IoPersonSharp className="text-gray-900 text-6xl" />
+      <h1 className="absolute text-4xl font-bold">{name}</h1>
+    </div>
+  )
 
+  const genreItems = genres.length > 0 ? genres.map((genre, index) => {
     return (
-      <svg height={radius * 2} width={radius * 2}>
-        <circle
-          stroke="#374151"
-          fill="transparent"
-          strokeWidth={stroke}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-        <circle
-          stroke={interpolateColor(percent)}
-          fill="transparent"
-          strokeWidth={stroke}
-          strokeLinecap="square"
-          strokeDasharray={circumference + ' ' + circumference}
-          strokeDashoffset={strokeDashoffset}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-          transform={`rotate(-90 ${radius} ${radius})`} // start at top
-        />
-        <text
-          x="50%"
-          y="50%"
-          dy=".3em"
-          textAnchor="middle"
-          fontSize="25"
-          fontWeight="bold"
-          fill="#ffffff"
-        >
-          {Math.round(percent * 100)}
-        </text>
-      </svg>
-    );
-  };
+      <p key={`${index}-${genre}`}>{capitalize(genre)}</p>
+    )
+  }) : <UnknownFiller />
+
+  const stats = (
+    <div className="grid grid-cols-3 w-150 m-10">
+      <p className="font-light text-sm mb-2 text-gray-500 text-center">FOLLOWERS</p>
+      <p className="font-light text-sm mb-2 text-gray-500 text-center">GENRES</p>
+      <p className="font-light text-sm mb-4 text-gray-500 text-center">POPULARITY</p>
+      <div className="flex flex-col justify-center text-center">
+        <h2 className="text-4xl font-bold">{followers >= 0 ? followers.toLocaleString() : <UnknownFiller />}</h2>
+      </div>
+      <div className="flex flex-col items-center justify-center">
+        <ul className="flex flex-col justify-center items-center text-center text-2xl">
+          {genreItems}
+        </ul>
+      </div>
+      <div className="flex flex-col items-center justify-center">
+        <CircularProgress value={popularity >= 0 ? popularity : <UnknownFiller />} max={100} />
+      </div>
+    </div>
+  )
+
+  const content = (
+    <>
+      {heroImg}
+      <div className="flex flex-col items-center justify-center">
+        <h1 className="text-5xl font-bold">{name}</h1>
+        {stats}
+      </div>
+    </>
+  )
 
   return (
-    <div className="text-white">
-      <div className="relative bg-gray-700 w-full h-40 aspect-square object-cover flex items-center justify-center">
-        <IoPersonSharp className="text-gray-900 text-6xl" />
-        <h1 className="absolute text-4xl font-bold">Artist Name</h1>
-      </div>
-      <div className="flex flex-col items-center justify-top m-4">
-        <div className="flex flex-col justify-center text-center mb-8">
-          <p className="font-light text-sm mb-2 text-gray-500">FOLLOWERS</p>
-          <h2 className="text-4xl font-bold">100,000</h2>
-        </div>
-        <div className="flex flex-col items-center justify-center mb-10">
-          <p className="font-light text-sm mb-2 text-gray-500">GENRES</p>
-          <ul className="flex flex-col justify-center items-center text-center text-2xl">
-            <p>Jazz</p>
-            <p>Punk</p>
-            <p>Ska</p>
-          </ul>
-        </div>
-        <div className="flex flex-col items-center justify-center">
-          <p className="font-light text-sm mb-4 text-gray-500">POPULARITY</p>
-          <CircularProgress value={50} max={100} />
-        </div>
-      </div>
+    <div className="text-white flex flex-col items-center">
+      {didLoadData ? content : <Loader />}
     </div>
   )
 }

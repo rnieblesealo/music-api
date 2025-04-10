@@ -6,6 +6,7 @@ import StatCard from "../components/StatCard"
 import FollowerFilter from "../components/FollowerFilter"
 import Loader from "../components/Loader"
 import GenreFilter from "../components/GenreFilter"
+import ChartDisplay from "../components/ChartDisplay"
 import capitalize from "../scripts/capitalize"
 
 import { FaLastfmSquare } from "react-icons/fa"
@@ -30,7 +31,10 @@ const Dashboard = () => {
   const [minFollowers, setMinFollowers] = useState(0)
   const [maxFollowers, setMaxFollowers] = useState(0)
 
+  /* -- STATE ----------- */
   const [didFindArtistData, setDidFindArtistData] = useState(true)
+  const [showPopVsPlays, setShowPopVsPlays] = useState(true)
+  const [showGenreFreqs, setShowGenreFreqs] = useState(true)
 
   /* -- CHART DATA ------ */
   const [popVsListens, setPopVsListens] = useState([])
@@ -159,7 +163,10 @@ const Dashboard = () => {
             }
           }).filter((data) => {
             return data !== null
-          }).sort((a, b) => a.playCount - b.playCount);
+          })
+            // sort the data
+            .sort((a, b) => a.playCount - b.playCount)
+            .sort((a, b) => a.popularity - b.popularity)
 
           return (chartData)
         })
@@ -290,116 +297,122 @@ const Dashboard = () => {
   )
 
   const popVsPlayChart = (
-    <div className="flex flex-col items-center text-center">
-      <h2 className="text-lg font-bold">Popularity vs. Playcount</h2>
-      <p className="text-gray-500">See listening patterns change based on artist popularity!</p>
-      <LineChart
-        width={500}
-        height={300}
-        data={popVsListens}
-        margin={{
-          top: 30,
-          bottom: 30,
-          right: 65
+    <LineChart
+      width={500}
+      height={300}
+      data={popVsListens}
+      margin={{
+        top: 30,
+        bottom: 30,
+        right: 10,
+        left: 15
+      }}
+    >
+      <CartesianGrid
+        stroke="#ffffff"
+        strokeOpacity="0.2"
+        strokeDasharray="3 3"
+      />
+      <XAxis
+        dataKey="popularity"
+        label={{
+          value: 'Popularity',
+          position: 'insideBottom',
+          offset: -15,
+          style: {
+            textAnchor: "middle"
+          }
         }}
-      >
-        <CartesianGrid
-          stroke="#ffffff"
-          strokeOpacity="0.2"
-          strokeDasharray="3 3"
-        />
-        <XAxis
-          dataKey="playCount"
-          label={{
-            value: 'Play Count',
-            position: 'insideBottom',
-            offset: -15,
-            style: {
-              textAnchor: "middle"
-            }
-          }}
-        />
-        <YAxis
-          label={{
-            value: 'Popularity',
-            angle: -90,
-            position: "insideLeft",
-            offset: 15,
-            style: {
-              textAnchor: "middle"
-            }
-          }} />
-        <Line
-          type="monotone"
-          dataKey="popularity"
-          stroke="#1DBE57"
-          strokeWidth="3"
-        />
-      </LineChart>
-    </div>
+      />
+      <YAxis
+        label={{
+          value: 'Play Count',
+          angle: -90,
+          position: "insideLeft",
+          offset: 15,
+          style: {
+            textAnchor: "middle"
+          }
+        }} />
+      <Line
+        type="monotone"
+        dataKey="playCount"
+        stroke="#1DBE57"
+        strokeWidth="3"
+      />
+    </LineChart>
   );
 
   const genreFreqChart = (
-    <div className="flex flex-col items-center text-center">
-      <h2 className="text-lg font-bold">Genres</h2>
-      <p className="text-gray-500">What genres is this user most into?</p>
-      <BarChart
-        width={500}
-        height={300}
-        data={genreFreqs} // Your frequency data, e.g. [{ name: 'mexican rock', count: 3 }, ...]
-        margin={{
-          top: 30,
-          bottom: 50,
-          right: 65,
+    <BarChart
+      width={500}
+      height={320}
+      data={genreFreqs} // Your frequency data, e.g. [{ name: 'mexican rock', count: 3 }, ...]
+      margin={{
+        top: 30,
+        bottom: 40,
+        right: 10,
+        left: 15
+      }}
+    >
+      <CartesianGrid
+        stroke="#ffffff"
+        strokeOpacity="0.2"
+        strokeDasharray="3 3"
+      />
+      <XAxis
+        dataKey="name"
+        label={{
+          value: 'Genre',
+          position: 'insideBottom',
+          offset: -35,
+          style: {
+            textAnchor: "middle",
+          },
         }}
-      >
-        <CartesianGrid
-          stroke="#ffffff"
-          strokeOpacity="0.2"
-          strokeDasharray="3 3"
-        />
-        <XAxis
-          dataKey="name"
-          label={{
-            value: 'Genre',
-            position: 'insideBottom',
-            offset: -35,
-            style: {
-              textAnchor: "middle",
-            },
-          }}
-          angle={-45} // Rotates the genre labels to avoid overlap
-          tick={{
-            dx: 0,
-            dy: 0,
-            fill: "#fff",
-            opacity: 0.5
-          }}
-        />
-        <YAxis
-          label={{
-            value: 'Frequency',
-            angle: -90,
-            position: "insideLeft",
-            offset: 15,
-            style: {
-              textAnchor: "middle",
-            }
-          }}
-        />
-        <Bar
-          dataKey="count"
-          fill="#1DBE57" // You can adjust this color
-          barSize={25} // Optional: adjust bar thickness
-        />
-      </BarChart>
-    </div>
+        angle={-45} // Rotates the genre labels to avoid overlap
+        tick={{
+          dx: 0,
+          dy: 0,
+          fill: "#fff",
+          opacity: 0.5
+        }}
+      />
+      <YAxis
+        label={{
+          value: 'Frequency',
+          angle: -90,
+          position: "insideLeft",
+          offset: 15,
+          style: {
+            textAnchor: "middle",
+          }
+        }}
+      />
+      <Bar
+        dataKey="count"
+        fill="#1DBE57" // You can adjust this color
+        barSize={25} // Optional: adjust bar thickness
+      />
+    </BarChart>
   )
 
   const charts = (
-    <div className="flex flex-col">
-      {popVsPlayChart}
-      {genreFreqChart}
+    <div className="flex flex-col gap-3">
+      <ChartDisplay
+        chart={popVsPlayChart}
+        name="Popularity vs. Playcount"
+        desc="See listening patterns change as artist popularity increases!"
+        showState={showPopVsPlays}
+        showFunc={setShowPopVsPlays}
+      />
+      <ChartDisplay
+        chart={genreFreqChart}
+        name="Genre Info"
+        desc="See what genres this user is most into!"
+        showState={showGenreFreqs}
+        showFunc={setShowGenreFreqs}
+      />
     </div>
   )
 

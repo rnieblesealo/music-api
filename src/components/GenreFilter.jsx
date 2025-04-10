@@ -57,7 +57,7 @@ const GenreFilter = ({
 
   return (
     <div className="min-w-50 w-50 h-min bg-gray-900 rounded-2xl p-2">
-      <p className="text-center mb-2">Click a genre to hide it</p>
+      <p className="text-center mb-2 text-gray-600">Click a genre to hide it</p>
       <div className="flex flex-col w-full gap-2">
         {genreFilters} 
       </div>

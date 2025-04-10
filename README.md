@@ -1,49 +1,50 @@
-# Web Development Project 5 - *MyTop12*
+# Web Development Project 6 - *#MyTop12 Part 2*
 
 Submitted by: **Rafael Niebles**
 
-This web app: **Allows you to find out information about any user's top 12 most listened to tracks.**
+This web app: **Allows anyone to find out more info about any LastFM user's top 12 most listened to tracks.**
 
-Time spent: **8** hours spent in total
+Time spent: **4** hours spent in total
 
 ## Required Features
 
 The following **required** functionality is completed:
 
-- [x] **The site has a dashboard displaying a list of data fetched using an API call**
-  - The dashboard should display at least 10 unique items, one per row
-  - The dashboard includes at least two features in each row
-- [x] **`useEffect` React hook and `async`/`await` are used**
-- [x] **The app dashboard includes at least three summary statistics about the data** 
-    > The summary stats are most mainstream artist, most niche (underground) artist, and most listened to genre
-- [x] **A search bar allows the user to search for an item in the fetched data**
-  - The search bar **correctly** filters items in the list, only displaying items matching the search query
-  - The list of results dynamically updates as the user types into the search bar
-- [x] **An additional filter allows the user to restrict displayed items by specified categories**
-    - The filter restricts items in the list using a **different attribute** than the search bar 
-    - The filter **correctly** filters items in the list, only displaying items matching the filter attribute in the dashboard
-    - The dashboard list dynamically updates as the user adjusts the filter
-    > You're able to filter out artists by genre using the menu on the left
+- [x] **Clicking on an item in the list view displays more details about it**
+  - Clicking on an item in the dashboard list navigates to a detail view for that item
+  - Detail view includes extra information about the item not included in the dashboard view
+    > Popularity score and full list of artist genres are displayed
+  - The same sidebar is displayed in detail view as in dashboard view
+    > Since there's only the detail view and dashboard, and you can only navigate between those 2, the only necessary sidebar button was "Home".
+  - *To ensure an accurate grade, your sidebar **must** be viewable when showing the details view in your recording.*
+- [x] **Each detail view of an item has a direct, unique URL link to that item’s detail view page**
+  -  *To ensure an accurate grade, the URL/address bar of your web browser **must** be viewable in your recording.*
+    > The user must click on the table row to navigate to the detail view
+- [x] **The app includes at least two unique charts developed using the fetched data that tell an interesting story**
+  - At least two charts should be incorporated into the dashboard view of the site
+  - Each chart should describe a different aspect of the dataset
+    > 2 charts; one shows listening frequency change as artist popularity increases (showing how "niche" or "mainstream" someone's taste is) and the other shows the genres which a given user listens to most and how much 
 
 The following **optional** features are implemented:
 
-- [x] Multiple filters can be applied simultaneously
-    > You can apply a follower range filter, genre filters, and a search filter at the same time
-- [x] Filters use different input types
-    > There is a toggle-wise filter (genres), numeric filter (follower range), and simple search filter
-- [x] The user can enter specific bounds for filter values
-    > The followers filter allows you to filter artists by min and max followers 
+- [x] The site’s customized dashboard contains more content that explains what is interesting about the data 
+  - e.g., an additional description, graph annotation, suggestion for which filters to use, or an additional page that explains more about the data
+    > The 2 charts have brief descriptions outlining what they show
+- [ ] The site allows users to toggle between different data visualizations
+  - User should be able to use some mechanism to toggle between displaying and hiding visualizations 
+    > The 2 charts have buttons controlling whether they're shown/hidden 
 
-## Video Walkthrough
+[Click here for a video walkthrough.](https://drive.google.com/file/d/1kmggR-woo-n9KwhlGa4gr_dWa12iQAac/view?usp=sharing)
 
-Because there are a number of features, the demo's been linked as a video.
+A video was used due to the length required to show all features!
 
-[Click here to access it!](https://drive.google.com/file/d/1ghAqV6RiABW16wNQTFus39fk2TZ1XUBw/view?usp=sharing)
+Image preview:
 
+![img-pre](./github/preview.png) 
 
 ## Notes
 
-Because LastFM (the user music info API) only returns top artists but not info about them (image, follow count, etc), I had to use Spotify's web search API as well to retrieve metadata about the specified artists by first grabbing the top 12's names from LastFM and then passing them to Spotify in order to receive metadata linked to those names. It was a fun exercise!
+It was fairly straightfoward to extend part 1 and implement everything. Due to API limitations, the only additional info I could include in detail view was popularity score and the full list of genres the artist pertains to.
 
 ## License
 

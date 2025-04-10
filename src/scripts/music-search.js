@@ -33,85 +33,83 @@ export async function getTopArtists(username) {
   }
 }
 
-export async function getSpotifyArtistInfo(artistName) {
+async function getSpotifyAccessToken() {
+  // NOTE: spotify uses form-encoded data which is why it's weird to call its api
   try {
-    async function getAccessToken() {
-      // NOTE: spotify uses form-encoded data which is why it's weird to call its api
-      try {
-        // make auth string (base64)
-        const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-        const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-        const auth = btoa(`${clientID}:${clientSecret}`) // encode as base64 (used by legacy apis as auth)
+    // make auth string (base64)
+    const clientID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+    const clientSecret = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
+    const auth = btoa(`${clientID}:${clientSecret}`) // encode as base64 (used by legacy apis as auth)
 
-        const baseUrl = "https://accounts.spotify.com/api/token"
+    const baseUrl = "https://accounts.spotify.com/api/token"
 
-        // url encoded data
-        const data = new URLSearchParams({
-          grant_type: "client_credentials"
-        })
+    // url encoded data
+    const data = new URLSearchParams({
+      grant_type: "client_credentials"
+    })
 
-        // auth headers
-        const headers = {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
+    // auth headers
+    const headers = {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
 
-        // get access token from response!
-        const res = await axios.post(baseUrl, data, {
-          headers: headers
-        })
+    // get access token from response!
+    const res = await axios.post(baseUrl, data, {
+      headers: headers
+    })
 
-        return res.data.access_token
-      } catch (error) {
-        console.error("Error getting Spotify access token: ", error)
-      }
+    return res.data.access_token
+  } catch (error) {
+    console.error("Error getting Spotify access token: ", error)
+  }
+}
+
+export async function getSpotifyArtistInfo(artistName) {
+}
+
+export async function getSpotifyArtistInfoById(id) {
+  try {
+    if (!id) {
+      throw new Error("No ID given!")
     }
 
     // get api access token
-    const accessToken = await getAccessToken()
+    const accessToken = await getSpotifyAccessToken()
 
     // abort if fail 
     if (!accessToken) {
       throw new Error()
     }
 
-    const baseUrl = "https://api.spotify.com/v1/search"
+    // NOTE: baseUrl has id in it
+    const baseUrl = `https://api.spotify.com/v1/artists/${id}`
 
-    // send auth to search api
+    // send auth
     const headers = {
       "Authorization": `Bearer ${accessToken}`
     }
 
-    // send query
-    const params = new URLSearchParams({
-      q: `artist:${artistName}`,
-      type: "artist"
-
-    })
-
-    // get response image url
     const res = await axios.get(baseUrl, {
       headers: headers,
-      params: params
     })
 
-    // get stuff we care about
-    const firstResult = res.data.artists.items[0];
+    const resData = res.data;
 
-    if (!firstResult){
-      return null;
+    const wantedData = {
+      id: resData.id,
+      name: resData.name,
+      image: resData.images[1].url,
+      genres: resData.genres,
+      followers: parseInt(resData.followers.total),
+      popularity: parseInt(resData.popularity),
     }
 
-    const spotifyData = {
-      image: firstResult.images[1].url,
-      genres: firstResult.genres,
-      popularity: parseInt(firstResult.popularity),
-      followers: parseInt(firstResult.followers.total)
-    }
+    console.log(wantedData)
 
-    return spotifyData;
+    return wantedData;
   } catch (error) {
-    console.error("Error searching Spotify: ", error)
+    console.error(error)
     return null;
   }
 }

@@ -1,5 +1,7 @@
 import capitalize from '../scripts/capitalize'
 
+import { Link, useNavigate } from "react-router-dom"
+
 import { FaQuestion } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
 
@@ -20,8 +22,12 @@ const ArtistCard = ({ data, rank }) => {
     </div>
   )
 
+  const navigate = useNavigate()
+
   return (
-    <tr className="align-middle text-center">
+    <tr 
+      onClick={() => {navigate(`/artistInfo/${data.id}`)}}
+      className="align-middle text-center">
       <td className="text-xl font-bold flex items-center">
         {img}
         <p className="mx-4 text-left">

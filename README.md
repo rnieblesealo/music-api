@@ -30,7 +30,7 @@ The following **optional** features are implemented:
 - [x] The site’s customized dashboard contains more content that explains what is interesting about the data 
   - e.g., an additional description, graph annotation, suggestion for which filters to use, or an additional page that explains more about the data
     > The 2 charts have brief descriptions outlining what they show
-- [ ] The site allows users to toggle between different data visualizations
+- [x] The site allows users to toggle between different data visualizations
   - User should be able to use some mechanism to toggle between displaying and hiding visualizations 
     > The 2 charts have buttons controlling whether they're shown/hidden 
 

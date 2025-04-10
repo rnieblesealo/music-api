@@ -1,6 +1,6 @@
 import capitalize from '../scripts/capitalize'
 
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 import { FaQuestion } from "react-icons/fa";
 import { IoPersonSharp } from "react-icons/io5";
